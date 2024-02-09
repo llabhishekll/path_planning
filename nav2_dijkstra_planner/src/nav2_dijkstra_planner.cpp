@@ -324,7 +324,54 @@ bool DijkstraGlobalPlanner::dijkstraShortestPath(
 
     // get neighbors of current node
     neighbors = find_neighbors(current_cell_index, costmap_flat);
+
+    // go through all neighbors of current node
+    for (auto &[neighbor_index, step_cost] : neighbors) {
+
+      // check if the neighbor has already been visited
+      if (closed_list.find(neighbor_index) != closed_list.end()) {
+        // if visited, move to next neighbor
+        continue;
+      }
+
+      // calculate 'g_cost' of neighbor based on current node
+      float g_cost = g_costs[current_cell_index] + step_cost;
+      auto neighbor_prime = std::make_pair(neighbor_index, g_cost);
+
+      // check if the neighbor is approched earlier and store element index
+      bool is_approched = false;
+      int element_index = 0;
+      while (element_index < open_list.size()) {
+        if (open_list[element_index].first == neighbor_index) {
+          is_approched = true;
+          break;
+        }
+        element_index++;
+      }
+
+      // if neighbor already approched earlier, update
+      if (is_approched) {
+        // check if new 'g_cost' is smaller then previous know cost
+        if (g_cost < g_costs[neighbor_index]) {
+          g_costs[neighbor_index] = g_cost;
+          parents[neighbor_index] = current_cell_index;
+          // update the node's g_cost inside open_list
+          open_list.at(element_index) = neighbor_prime;
+        }
+      }
+      // if neighbor never approched earlier, create
+      else {
+        g_costs[neighbor_index] = g_cost;
+        parents[neighbor_index] = current_cell_index;
+        // add neighbor to open_list
+        open_list.push_back(neighbor_prime);
+      }
+    }
+    RCLCPP_INFO_THROTTLE(node_->get_logger(), *node_->get_clock(), 100,
+                         "[%lu, %lu, %lu]", open_list.size(),
+                         closed_list.size(), parents.size());
   }
+  RCLCPP_INFO(node_->get_logger(), "Dijkstra: done traversing nodes");
 
   return true;
 }
