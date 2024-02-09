@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Start everythind needed for autonomous navigation on a given map -->
+
+<launch>
+
+  <include file="$(find-pkg-share localization_server)/launch/localization.launch.py"/>
+  <include file="$(find-pkg-share path_planner_server)/launch/pathplanner.launch.py"/>
+
+</launch>
