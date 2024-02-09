@@ -4,7 +4,7 @@ planner_server:
     use_sim_time: True
     planner_plugins: ["GridBased"]
     GridBased:
-      plugin: "nav2_navfn_planner/NavfnPlanner"
+      plugin: "nav2_dijkstra_planner/DijkstraGlobalPlanner"
       tolerance: 0.5
       use_astar: false
       allow_unknown: true
