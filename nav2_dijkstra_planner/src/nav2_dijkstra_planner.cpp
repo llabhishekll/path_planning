@@ -367,11 +367,24 @@ bool DijkstraGlobalPlanner::dijkstraShortestPath(
         open_list.push_back(neighbor_prime);
       }
     }
-    RCLCPP_INFO_THROTTLE(node_->get_logger(), *node_->get_clock(), 100,
-                         "[%lu, %lu, %lu]", open_list.size(),
-                         closed_list.size(), parents.size());
   }
   RCLCPP_INFO(node_->get_logger(), "Dijkstra: done traversing nodes");
+
+  // reconstruct shortest path by working backwards from target
+  if (is_path_found) {
+    int node = goal_cell_index;
+    shortest_path.push_back(goal_cell_index);
+    while (node != start_cell_index) {
+      shortest_path.push_back(node);
+      node = parents.at(node);
+    }
+    // reverse the constructed path
+    std::reverse(shortest_path.begin(), shortest_path.end());
+    RCLCPP_INFO(node_->get_logger(), "Dijkstra: done reconstructing path");
+  } else {
+    RCLCPP_WARN(node_->get_logger(), "Dijkstra: no path found!");
+    return false;
+  }
 
   return true;
 }
